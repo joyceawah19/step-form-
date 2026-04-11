@@ -40,7 +40,7 @@ function Summary({ formData, selected, setActiveState }) {
               Change
             </button>
           </div>
-          <p className="text-[hsl(213,96%,18%)] font-bold">
+          <p className="text-[hsl(213,96%,18%)] font-bold text-sm lg:text-[20px]">
             ${planTotal}/{isYearly ? "yr" : "mo"}
           </p>
         </div>
@@ -51,7 +51,7 @@ function Summary({ formData, selected, setActiveState }) {
           {formData.addons.map((addon) => (
             <div key={addon.id} className="flex items-center justify-between">
               <p className="text-[hsl(231,11%,63%)] text-sm">{addon.title}</p>
-              <p className="text-[hsl(213,96%,18%)] text-sm">
+              <p className="text-[hsl(213,96%,18%)] text-sm lg:text-[20px] font-bold">
                 +${isYearly ? addon.yearlyPrice : addon.monthlyPrice}/
                 {isYearly ? "yr" : "mo"}
               </p>
@@ -65,7 +65,7 @@ function Summary({ formData, selected, setActiveState }) {
         <p className="text-[hsl(231,11%,63%)] text-sm">
           Total (per {isYearly ? "year" : "month"})
         </p>
-        <p className="text-[hsl(243,100%,62%)] font-bold text-[20px]">
+        <p className="text-[hsl(243,100%,62%)] font-bold text-[16px] lg:text-[20px]">
           +${calculateTotal()}/{isYearly ? "yr" : "mo"}
         </p>
       </div>
