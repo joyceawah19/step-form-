@@ -20,7 +20,7 @@ function Summary({ formData, selected, setActiveState }) {
   };
 
   return (
-    <div className="bg-white flex flex-col justify-center h-fit px-10 py-8 lg:py-4 rounded-lg">
+    <div className="bg-white flex flex-col justify-center h-fit px-6 lg:px-10 py-8 lg:py-4 rounded-lg">
       <h1 className="text-[30px] text-[hsl(213,96%,18%)] font-bold">Finishing up</h1>
       <p className="text-[hsl(231,11%,63%)]">
         Double-check everything looks OK before confirming.

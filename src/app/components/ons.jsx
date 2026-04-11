@@ -45,7 +45,7 @@ function Addons({ formData, setFormData, errors }) {
 
 
   return (
-    <div className="bg-white flex flex-col justify-center h-fit px-10 py-12 lg:py-4 rounded-lg">
+    <div className="bg-white flex flex-col justify-center h-fit px-6 lg:px-10 py-12 lg:py-4 rounded-lg">
       <h1 className="text-[30px] text-[hsl(213,96%,18%)] font-bold">Pick add-ons</h1>
       <p className="text-[hsl(231,11%,63%)]">Add-ons help enhance your gaming experience.</p>
 

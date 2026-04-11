@@ -4,7 +4,7 @@ import { useState } from "react";
 export default function MyForm({formData, setFormData, errors, handleChange}) {
 
   return (
-    <div className = "bg-white flex justify-center h-fit rounded-lg px-12 py-10 lg:py-4" > 
+    <div className = "bg-white flex justify-center h-fit rounded-lg px-6 lg:px-10 py-10 lg:py-4" > 
             <div className=" h-fit" >
                 <h1 className =" text-[30px] text-[hsl(213,96%,18%)] font-bold "> Personal info</h1>
                 <p className = "text-[hsl(231,11%,63%)] text-[14px]"> Please provide your name, email address, and phone number.</p>
