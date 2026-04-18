@@ -2,11 +2,13 @@
 import React from "react";
 import { useState } from "react";
 import { supabase } from "../lib/supabase";
+import { ArrowLeft } from "lucide-react";
 
 import MyForm from "./form.jsx";
 import Plan from "./plan.jsx";
 import Addons from "./ons.jsx";
 import Summary from "./summary";
+import UserManagerDashboard from "./usermanager.jsx";
 
 function Mainpage() {
   const [activeState, setActiveState] = useState(0);
@@ -14,12 +16,16 @@ function Mainpage() {
   const [errors, setErrors] = useState({});
   const [selected, setSelected] = useState("");
   const [showToast, setShowToast] = useState(false);
+  const [totalToSubmit, setTotalToSubmit] = useState(0);
+  const [onsAmountPaid, setOnsAmountPaid] = useState(0);
   const [formData, setFormData] = useState({
     name: "",
     email: "",
     phone: "",
     addons: [],
     isYearly: false,
+    amount: 0,
+    totalAmount: 0,
   });
 
   const handleChange = (e) => {
@@ -36,29 +42,26 @@ function Mainpage() {
     if (!formData.name.trim()) {
       newErrors.name = "Name is required";
     }
-
     if (!formData.email.trim()) {
       newErrors.email = "Email is required";
     } else if (!/\S+@\S+\.\S+/.test(formData.email)) {
       newErrors.email = "Invalid email format";
     }
-
     if (!formData.phone.trim()) {
       newErrors.phone = " phone number is required";
     } else if (!/^\+?[0-9\s\-()]{7,}$/.test(formData.phone)) {
       newErrors.phone = "Invalid phone number";
     }
-
     return newErrors;
   };
 
-  const planValidation = () => {
-    let newErrors = {};
-    if (selected === "") {
-      newErrors.Plan = "please select a plan";
-    }
-    return newErrors;
-  };
+  // const planValidation = () => {
+  //   let newErrors = {};
+  //   if (selected === "") {
+  //     newErrors.Plan = "please select a plan";
+  //   }
+  //   return newErrors;
+  // };
 
   const handleNext = (e) => {
     e.preventDefault();
@@ -89,28 +92,38 @@ function Mainpage() {
       setActiveState((prev) => Math.min(prev + 1, 3));
     }
   };
-  // Form200$4password supabaze password
-  const handleSubmit = async () => {
-    const { data, error } = await supabase
-      .from("Form-submissions") // Your table name
-      .insert([
-        {
-          name: formData.name,
-          email: formData.email,
-          phone: formData.phone,
-          plan: selected, // Your 'selected' state for the plan
-          isyearly: formData.isYearly,
-          addons: formData.addons, // This saves as a JSON array
-        },
-      ]);
+  // Form200$4password supabase password
+  const handleSubmit = async (e) => {
+    e.preventDefault();
 
-    if (error) {
-      console.error("Error inserting data:", error.message);
-      alert("Something went wrong saving your data.");
-    } else {
-      setShowToast(true);
-      setTimeout(() => setShowToast(false), 3000);
-      // setActiveState(3);  Move to a "Thank You" screen
+    try {
+      const { data, error } = await supabase
+        .from("Form-submissions") // Your table name
+        .insert([
+          {
+            name: formData.name,
+            email: formData.email,
+            phone: formData.phone,
+            plan: formData.plan,
+            isyearly: formData.isYearly,
+            addons: formData.addons, // This saves as a JSON array
+            planAmount: formData.planPrice,
+            billing: formData.billingCycle,
+            totalAmount: totalToSubmit,
+            onsAmount: onsAmountPaid
+          },
+        ]);
+
+      if (error) {
+        console.error("Error inserting data:", error.message);
+        alert("Something went wrong saving your data.");
+      } else {
+        setShowToast(true);
+        setTimeout(() => setShowToast(false), 4000);
+        setActiveState(0); //Move to a "Thank You" screen
+      }
+    } catch (error) {
+      alert(error.message);
     }
   };
 
@@ -151,22 +164,56 @@ function Mainpage() {
               </div>
             </div>
           ))}
+          {activeState === 4 ? (
+            <button
+              className="flex gap-1 w-fit text-white cursor-pointer border border-white bg-transparent rounded-[20px] font-bold py-2 px-6 w-auto sm:text-sm"
+              onClick={() => setActiveState(0)}
+            >
+              <ArrowLeft size={20} strokeWidth={6} />
+              <p>Back</p>
+            </button>
+          ) : (
+            <button
+              className="text-white cursor-pointer border border-white bg-transparent rounded-[20px] font-bold p-4 w-auto sm:text-sm"
+              onClick={() => setActiveState(4)}
+            >
+              View Users
+            </button>
+          )}{" "}
         </div>
 
         {/* small screens navbar */}
         <div
-          className="flex lg:hidden gap-4 border bg-cover bg-center text-white py-8 pb-28  justify-center items-center relative left-1/2 -translate-x-1/2 w-screen "
+          className="flex lg:hidden gap-4 border bg-cover bg-center text-white py-8 pb-28 border justify-center items-center relative left-1/2 -translate-x-1/2 w-screen "
           style={{ backgroundImage: "url('/images/bg-sidebar-mobile.svg')" }}
         >
-          {navBarItems.map((items, index) => (
-            <div key={index} className="flex gap-2">
-              <div
-                className={`border border-white rounded-full w-10 h-10 p-2 text-[12px] flex items-center justify-center cursor-pointer ${activeState === index ? "bg-[hsl(206,94%,87%)] " : "bg-transparent"}`}
-              >
-                {index + 1}{" "}
+          <div className="flex gap-4  ">
+            {navBarItems.map((items, index) => (
+              <div key={index} className="flex gap-2">
+                <div
+                  className={`border border-white rounded-full w-10 h-10 p-2 text-[12px] flex items-center justify-center cursor-pointer ${activeState === index ? "bg-[hsl(206,94%,87%)] " : "bg-transparent"}`}
+                >
+                  {index + 1}{" "}
+                </div>
               </div>
-            </div>
-          ))}
+            ))}
+          </div>
+          {activeState === 4 ? (
+            <button
+              className="ml-8 flex gap-1 cursor-pointer text-white border border-white bg-transparent rounded-[20px] font-bold py-2 px-4 w-auto"
+              onClick={() => setActiveState(0)}
+            >
+              <ArrowLeft size={20} strokeWidth={6} />
+              <p>Back</p>
+            </button>
+          ) : (
+            <button
+              className="ml-8 text-white cursor-pointer font-bold border border-white bg-transparent rounded-[20px] font-bold px-4 py-2 w-auto"
+              onClick={() => setActiveState(4)}
+            >
+              View Users
+            </button>
+          )}
         </div>
 
         <div className="-mt-20 lg:mt-0 px-4 relative z-10  ">
@@ -183,6 +230,8 @@ function Mainpage() {
               selected={selected}
               setSelected={setSelected}
               errors={errors}
+              formData={formData}
+              setFormData={setFormData}
             />
           )}
           {activeState === 2 && (
@@ -190,6 +239,7 @@ function Mainpage() {
               formData={formData}
               setFormData={setFormData}
               errors={errors}
+              setOnsAmountPaid = {setOnsAmountPaid}
             />
           )}
           {activeState === 3 && (
@@ -197,8 +247,10 @@ function Mainpage() {
               formData={formData}
               selected={selected}
               setActiveState={setActiveState}
+              setTotalToSubmit={setTotalToSubmit}
             />
           )}
+          {activeState === 4 && <UserManagerDashboard />}
 
           <div className="hidden lg:flex justify-between pt-24 py-4 px-12  ">
             <button

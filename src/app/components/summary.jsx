@@ -1,6 +1,7 @@
 import React from "react";
+import { useState, useEffect } from "react";
 
-function Summary({ formData, selected, setActiveState }) {
+function Summary({ formData, selected, setActiveState, setTotalToSubmit }) {
   // Pricing logic
   const planPrices = {
     Arcade: 9,
@@ -8,16 +9,23 @@ function Summary({ formData, selected, setActiveState }) {
     Pro: 15,
   };
 
-  const isYearly = formData.isYearly;
+  const isYearly = formData.billingCycle === "Yearly";
   const basePrice = planPrices[selected] || 0;
   const planTotal = isYearly ? basePrice * 10 : basePrice;
 
   const calculateTotal = () => {
-    const addonsTotal = formData.addons.reduce((acc, addon) => {
+    const addonsTotal = (formData.addons || [] ).reduce((acc, addon) => {
       return acc + (isYearly ? addon.yearlyPrice : addon.monthlyPrice);
     }, 0);
     return planTotal + addonsTotal;
   };
+
+  //this is called the callback method
+  useEffect(() =>{
+    const total = calculateTotal();
+    setTotalToSubmit(total); //this reports back the value to the mainpage
+  }, [formData, selected]);
+
 
   return (
     <div className="bg-white flex flex-col justify-center h-fit px-6 lg:px-10 py-8 lg:py-4 rounded-lg">
@@ -65,7 +73,7 @@ function Summary({ formData, selected, setActiveState }) {
         <p className="text-[hsl(231,11%,63%)] text-sm">
           Total (per {isYearly ? "year" : "month"})
         </p>
-        <p className="text-[hsl(243,100%,62%)] font-bold text-[16px] lg:text-[20px]">
+        <p className="text-[hsl(243,100%,62%)] font-bold text-sm lg:text-[20px]">
           +${calculateTotal()}/{isYearly ? "yr" : "mo"}
         </p>
       </div>

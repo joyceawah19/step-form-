@@ -1,6 +1,8 @@
+"use client"
+import { useState, useEffect } from "react";
 import React from "react";
 
-function Addons({ formData, setFormData, errors }) {
+function Addons({ formData, setFormData, errors, setOnsAmountPaid }) {
   const availableAddons = [
     {
       id: "online-service",
@@ -26,7 +28,6 @@ function Addons({ formData, setFormData, errors }) {
   ];
 
   const toggleAddon = (addon) => {
-  // Use ?. and || [] to ensure we always have an array to work with
   const currentAddons = formData?.addons || [];
   const isSelected = currentAddons.some((item) => item.id === addon.id);
   
@@ -36,12 +37,26 @@ function Addons({ formData, setFormData, errors }) {
       addons: currentAddons.filter((item) => item.id !== addon.id),
     });
   } else {
-    setFormData({
+    setFormData({ 
       ...formData,
       addons: [...currentAddons, addon],
     });
   }
 };
+
+useEffect(() =>{
+  const currentAddons = formData?.addons || [];
+
+  const isyearly = formData.billingCycle === "Yearly";
+
+  const totalOns = currentAddons.reduce((acc, addons) => {
+    const price = isyearly ? addons.yearlyPrice : addons.monthlyPrice;
+    return acc + price;
+  },0 );
+  if (setOnsAmountPaid){
+    setOnsAmountPaid(totalOns);
+  }
+ },[formData.addons, formData.billingCycle, setOnsAmountPaid]);
 
 
   return (

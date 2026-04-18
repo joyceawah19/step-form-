@@ -1,32 +1,53 @@
 import React from "react";
 import Image from "next/image";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 
-function Plan({selected, setSelected, errors}) {
+function Plan({selected, setSelected, formData, setFormData,  errors}) {
   const paymentType = [
     {
       image: "/images/icon-arcade.svg",
       name: "Arcade",
-      monthlyAmount: "$9/mo",
-      yearlyAmount: "$90/yr",
+      monthlyAmount: "9/mo",
+      yearlyAmount: "90/yr",
       alt: "arcade",
     },
     {
       image: "/images/icon-advanced.svg",
       name: "Advanced",
-      monthlyAmount: "$12/mo",
-      yearlyAmount: "$120/yr",
+      monthlyAmount: "12/mo",
+      yearlyAmount: "120/yr",
       alt: "advanced",
     },
     {
       image: "/images/icon-pro.svg",
       name: "Pro",
-      monthlyAmount: "$15/mo",
-      yearlyAmount: "$150/yr",
+      monthlyAmount: "15/mo",
+      yearlyAmount: "150/yr",
       alt: "pro",
     },
   ];
   const [isYearly, setIsYearly] = useState(false);
+  const currentPlan = paymentType.find((p) => p.name  === selected);
+
+  useEffect(() => {
+    if (currentPlan && setFormData) {
+      const price = isYearly ? currentPlan.yearlyAmount :  currentPlan.monthlyAmount;
+      const billing = isYearly ? "Yearly" :"Monthly";
+
+      if(
+        formData.Data !== currentPlan.name ||
+        formData.plan.price !== price || 
+        formData.billingCycle !== billing
+      ){
+
+      setFormData((prev) =>({
+        ...prev, 
+        plan:currentPlan.name,
+        planPrice: price,
+        billingCycle: billing
+      }) );
+    }
+  }},[selected, isYearly, setFormData, formData.plan, formData.planPrice, formData.billingCycle]);
 
   return (
     <div className="bg-white flex flex-col justify-center h-fit px-6 lg:px-10 py-8 lg:py-4 rounded-lg">
@@ -41,7 +62,7 @@ function Plan({selected, setSelected, errors}) {
         {paymentType.map((type, index) => (
           <div
           onClick = {() => setSelected(type.name)}
-            className={` cursor-pointer flex gap-4 p-4 border  rounded-lg ${ selected ===type.name ? "border border-[hsl(272,73%,80%)] bg-[hsl(205,51%,87%)] ":" border-[hsl(240,4%,80%)] hover:border-[hsl(243,100%,62%)] "}`}
+            className={` cursor-pointer flex gap-4 p-4 border  rounded-lg ${ selected === type.name ? "border border-[hsl(272,73%,80%)] bg-[hsl(205,51%,87%)] ":" border-[hsl(240,4%,80%)] hover:border-[hsl(243,100%,62%)] "}`}
             key={index}
           >
             <Image src={type.image} height={30} width={30} alt={type.alt} />
@@ -50,7 +71,7 @@ function Plan({selected, setSelected, errors}) {
                 {type.name}
               </h2>
               <p className=" text-[hsl(231,11%,63%)] text-[12px] ">
-                {isYearly? type.yearlyAmount : type.monthlyAmount}
+                {isYearly? `$${type.yearlyAmount}` : `$${type.monthlyAmount}`}
               </p>
             </div>
           </div>
@@ -63,8 +84,7 @@ function Plan({selected, setSelected, errors}) {
 
       <div className="flex items-center justify-center gap-4 mt-8 bg-[hsl(205,51%,87%)] rounded-lg px-6 py-4">
         {/* Monthly */}
-        <p
-          className={`font-bold ${!isYearly ? "text-[hsl(213,96%,18%)]" : "text-gray-400"}`}
+        <p className={`font-bold ${!isYearly ? "text-[hsl(213,96%,18%)]" : "text-gray-400"}`}
         >
           Monthly
         </p>
