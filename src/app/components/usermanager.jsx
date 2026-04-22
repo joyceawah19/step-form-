@@ -1,13 +1,20 @@
 "use client";
 import React from "react";
 import { supabase } from "../lib/supabase.js";
-import { Search, Filter, Edit2, Trash2 } from "lucide-react";
+import { Search, Filter, Edit2, Trash2, MoreVertical } from "lucide-react";
 import { useState, useEffect } from "react";
+import EditUserModal from "./edit.jsx";
+import toast from "react-hot-toast";
+import { Toaster } from "react-hot-toast";
 
 function UserManagerDashboard() {
   const [loading, setLoading] = useState(true);
   const [users, setUsers] = useState([]);
-  const[searchTerm, setSearchTerm] = useState('')
+  const [searchTerm, setSearchTerm] = useState("");
+  const [openMenuId, setOpenMenuId] = useState(null);
+  const [isEditModalOpen, setIsEditModalOpen] = useState(false);
+  const [selectedUser, setSelectedUser] = useState(null);
+  const [userToDelete, setUserToDelete] = useState(null); // stores the ID or null
 
   const fetchFormData = async () => {
     try {
@@ -34,45 +41,59 @@ function UserManagerDashboard() {
     fetchFormData();
   }, []);
 
-  const deleteUsers = async (id) => {
-    if (!window.confirm("Are you sure you want to delete this user?")) return;
+  // Step 1: Just open the modal
+  const confirmDelete = (id) => {
+    setUserToDelete(id);
+  };
+
+  // Step 2: Actually talk to Supabase
+  const handleConfirmDelete = async () => {
+    if (!userToDelete) return;
+
     try {
       const { error } = await supabase
         .from("Form-submissions")
         .delete()
-        .eq("id", id);
+        .eq("id", userToDelete);
+
       if (error) throw error;
-      setUsers(users.filter((user) => user.id !== id));
-      alert("User deleted successfully!");
+
+      setUsers(users.filter((user) => user.id !== userToDelete));
+      toast.success("User deleted successfully!");
     } catch (error) {
-      alert("Failed to delete user");
-      console.error(
-        "Detailed Error:",
-        error.message,
-        error.details,
-        error.hint,
-      );
+      toast.error("Failed to delete user");
+      console.error("Delete Error:", error);
+    } finally {
+      setUserToDelete(null); // Close modal
     }
   };
- 
+
   const filterUsers = users.filter((user) => {
     const search = searchTerm.toLowerCase();
-    return(
-      user.name?.toLowerCase().includes(search) || 
+    return (
+      user.name?.toLowerCase().includes(search) ||
       user.email?.toLowerCase().includes(search)
     );
-  } )
+  });
+
+  const handleEditClick = (user) => {
+    setSelectedUser(user);
+    setIsEditModalOpen(true);
+  };
 
   return (
-    <div className="bg-white flex flex-col justify-center h-fit rounded-lg px-6 lg:px-10 py-10 lg:py-4 gap-4 max-w-full overflow-hidden">
+    <div className=" bg-white flex flex-col max-w-full min-w-0 h-fit justify-center rounded-lg px-6 lg:px-10 py-10 lg:py-4 gap-4 ">
       <div>
+        <Toaster position="top-right" reversedOrder={false} />
+      </div>
+      <div className=" w-full">
         <h1 className="font-bold text-[30px] ">Manage Users</h1>
         <p className="text-[hsl(231,11%,63%)] ">
           Manage all users from multi-step-form
         </p>
       </div>
 
-      <div className="flex w-full justify-between items-center gap-4 p-6 shadow-sm bg-[hsl(204,56%,98%)] flex wrap">
+      <div className="flex w-full justify-between items-center gap-4 lg:p-6 p-2 shadow-sm bg-[hsl(204,56%,98%)] justify-between">
         <div className="relative w-full rounded-lg flex  justify-center items-center">
           <Search className="absolute left-2 h-4 w-6" />
           <input
@@ -87,22 +108,29 @@ function UserManagerDashboard() {
             <Filter className="h-4 w-4" />
             <p>Filter</p>
           </button>
-          {/* <button className="flex p-4 gap-4 justify-center items-center rounded-lg text-white bg-[hsl(213,96%,18%)] ml-auto ">
-            <p>+</p>
-            <p>Add Users</p>
-          </button> */}
         </div>
       </div>
-      <div className="w-full overflow-x-auto border border-slate-100 rounded-x">
-        <table className=" min-w-[900px] w-full text-center border-collapse w-full text-xs md:text-sm">
+      <div className="w-full overflow-x-auto  lg:overflow-x-hidden rounded-lg">
+        {/* <table className=" min-w-max lg:min-w-full  border-collapse w-full text-xs md:text-sm"> */}
+        <table className="w-full table-auto border-collapse text-xs md:text-sm">
           <thead>
             <tr className="bg-slate-50 border-b border-slate-100 text-slate-600 text-sm">
-              <th className="px-6 py-4 font-semibold">User</th>
-              <th className="px-6 py-4 font-semibold">Plan Details</th>
-              <th className="px-6 py-4 font-semibold">Add-ons</th>
-              <th className="px-6 py-4 font-semibold">Total Amount</th>
-              <th className="px-6 py-4 font-semibold">Phone</th>
-              <th className="px-6 py-4 font-semibold text-right">Actions</th>
+              <th className="px-6 py-4 font-semibold w-[25%]">User</th>
+              <th className="px-6 py-4 font-semibold w-[15%] whitespace-nowrap">
+                Plan Details
+              </th>
+              <th className="px-6 py-4 font-semibold w-[30%] whitespace-nowrap">
+                Add-ons
+              </th>
+              <th className="px-6 py-4 font-semibold w-[10%] whitespace-nowrap">
+                Total
+              </th>
+              <th className="px-6 py-4 font-semibold w-[10%] whitespace-nowrap">
+                Phone
+              </th>
+              <th className="px-6 py-4 font-semibold w-[10%] text-right whitespace-nowrap">
+                Actions
+              </th>
             </tr>
           </thead>
           <tbody className="divide-y divide-slate-50">
@@ -114,23 +142,24 @@ function UserManagerDashboard() {
               <tr>
                 <td>No user found </td>
               </tr>
-            ) :filterUsers.length == 0 ? (
-              <tr><td colSpan="6" className="py-10 text-center text-slate-500">No matching users found</td></tr>
-            ):(
-    
+            ) : filterUsers.length == 0 ? (
+              <tr>
+                <td colSpan="6" className="py-10 text-center text-slate-500">
+                  No matching users found
+                </td>
+              </tr>
+            ) : (
               filterUsers.map((user) => (
-      // ... your <tr> code ...
-              // users.map((user) => (
                 <tr
                   key={user.id || Math.random()}
                   className=" transition-colors group cursor-pointer odd:bg-white hover:bg-[hsl(206,94%,97%)] even:bg-slate-50/50 "
                 >
                   <td className="px-6 py-4">
                     <div className="flex flex-col">
-                      <span className="font-bold text-slate-700">
+                      <span className="font-bold text-slate-700 whitespace-nowrap">
                         {user.name}
                       </span>
-                      <span className="text-sm text-slate-500">
+                      <span className="text-sm text-slate-500 whitespace-nowrap">
                         {user.email}
                       </span>
                     </div>
@@ -183,13 +212,16 @@ function UserManagerDashboard() {
                   </td>
                   <td className="px-6 py-4 text-right">
                     <div className="flex justify-end gap-2">
-                      <button className="p-2 text-slate-400 hover:text-indigo-600 hover:bg-indigo-50 rounded-lg transition-all">
+                      <button
+                        className="cursor-pointer p-2 text-slate-400 hover:text-indigo-600 hover:bg-indigo-50 rounded-lg transition-all"
+                        onClick={() => handleEditClick(user)}
+                      >
                         <Edit2 className="w-4 h-4" />
                       </button>
                       <button
                         className="p-2 text-slate-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition-all"
                         onClick={() => {
-                          deleteUsers(user.id);
+                          confirmDelete(user.id);
                         }}
                       >
                         <Trash2 className="w-4 h-4" />
@@ -202,6 +234,57 @@ function UserManagerDashboard() {
           </tbody>
         </table>
       </div>
+      {isEditModalOpen && selectedUser && (
+        <EditUserModal
+          isOpen={isEditModalOpen}
+          user={selectedUser}
+          onClose={() => setIsEditModalOpen(false)}
+          onSave={fetchFormData} // This refreshes the table after saving
+        />
+      )}
+
+      {/* Delete Confirmation Modal */}
+      {userToDelete && (
+        <div className="fixed inset-0 z-[100] flex items-center justify-center p-4">
+          {/* Backdrop */}
+          <div
+            className="absolute inset-0 bg-slate-900/60 backdrop-blur-sm"
+            onClick={() => setUserToDelete(null)}
+          />
+
+          {/* Modal Content */}
+          <div className="relative bg-white rounded-2xl shadow-2xl max-w-sm w-full p-6 animate-in zoom-in-95 duration-200">
+            <div className="flex flex-col items-center text-center">
+              <div className="w-12 h-12 bg-red-100 rounded-full flex items-center justify-center mb-4">
+                <X className="w-6 h-6 text-red-600" />
+              </div>
+
+              <h3 className="text-lg font-bold text-slate-900">
+                Confirm Deletion
+              </h3>
+              <p className="text-sm text-slate-500 mt-2">
+                Are you sure you want to delete this user? This action cannot be
+                undone.
+              </p>
+
+              <div className="flex gap-3 mt-6 w-full">
+                <button
+                  onClick={() => setUserTyoDelete(null)}
+                  className="flex-1 px-4 py-2.5 border border-slate-200 text-slate-600 rounded-lg font-semibold hover:bg-slate-50 transition-colors"
+                >
+                  Cancel
+                </button>
+                <button
+                  onClick={handleConfirmDelete}
+                  className="flex-1 px-4 py-2.5 bg-red-600 text-white rounded-lg font-semibold hover:bg-red-700 transition-colors"
+                >
+                  Yes, Delete
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

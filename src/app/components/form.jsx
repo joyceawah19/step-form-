@@ -1,14 +1,14 @@
 "use client";
 import { useState } from "react";
 
-export default function MyForm({formData, setFormData, errors, handleChange}) {
+export default function MyForm({formData, errors, handleChange}) {
 
   return (
-    <div className = "bg-white flex justify-center h-fit rounded-lg px-6 lg:px-10 py-10 lg:py-4" > 
-            <div className=" h-fit" >
+    <div className = "bg-white flex justify-center h-fit rounded-lg px-6 lg:px-10 py-10 lg:py-4 " > 
+            <div className="w-full  h-fit" >
                 <h1 className =" text-[30px] text-[hsl(213,96%,18%)] font-bold "> Personal info</h1>
                 <p className = "text-[hsl(231,11%,63%)] text-[14px]"> Please provide your name, email address, and phone number.</p>
-                <form className="flex flex-col gap-2 mt-4 " >
+                <form className="flex flex-col gap-2 mt-4 w-full" >
                     <label htmlFor="name" className="mt-4 text-[hsl(213,96%,18%)]" >Name</label>
                     <input type="text" name="name" value={formData.name}  onChange={handleChange} placeholder="e.g Stephane King " className ={`${errors.name ? "border border-red-600":" border border-[hsl(231,4%,68%)]"} p-4 rounded-lg`} />
                     {errors.name && (

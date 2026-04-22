@@ -35,7 +35,6 @@ function Mainpage() {
     }
   };
 
-  //validation function
   const formValidation = () => {
     let newErrors = {};
 
@@ -55,13 +54,6 @@ function Mainpage() {
     return newErrors;
   };
 
-  // const planValidation = () => {
-  //   let newErrors = {};
-  //   if (selected === "") {
-  //     newErrors.Plan = "please select a plan";
-  //   }
-  //   return newErrors;
-  // };
 
   const handleNext = (e) => {
     e.preventDefault();
@@ -110,7 +102,7 @@ function Mainpage() {
             planAmount: formData.planPrice,
             billing: formData.billingCycle,
             totalAmount: totalToSubmit,
-            onsAmount: onsAmountPaid
+            onsAmount: onsAmountPaid,
           },
         ]);
 
@@ -128,8 +120,9 @@ function Mainpage() {
   };
 
   return (
-    <div className="bg-[hsl(208,42%,94%)] flex justify-center min-h-screen  ">
-      <div className="bg-[hsl(208,42%,94%)] lg:bg-white h-fit lg:p-4 mb-20 lg:mb-0 lg:my-20 rounded-lg flex flex-col lg:flex-row gap-6 ">
+    <div className="bg-[hsl(208,42%,94%)] flex w-full overflow-x-hidden min-h-screen  ">
+      <div className="w-full max-w-full lg:max-w-5xl mx-auto bg-[hsl(208,42%,94%)] lg:bg-white h-fit lg:p-4 mb-20 lg:mb-0 lg:my-20 rounded-lg flex flex-col lg:flex-row gap-6">
+        {/* <div className="bg-[hsl(208,42%,94%)] lg:bg-white h-fit lg:p-4 mb-20 lg:mb-0 lg:my-20 rounded-lg flex flex-col lg:flex-row gap-6 "> */}
         {/* Success Popup */}
         {showToast && (
           <div className="fixed top-10 right-5 z-50 bg-green-300 text-white px-6 py-4 rounded-lg shadow-2xl flex items-center gap-3 animate-bounce lg:animate-none">
@@ -146,11 +139,11 @@ function Mainpage() {
         )}
         {/* large screens navbar */}
         <div
-          className="hidden lg:flex flex-col gap-8 border bg-cover bg-center text-white p-6 pr-8"
+          className="hidden lg:flex flex-col gap-8 border bg-cover bg-center text-white p-6 pr-8 "
           style={{ backgroundImage: "url('/images/bg-sidebar-desktop.svg')" }}
         >
           {navBarItems.map((items, index) => (
-            <div key={index} className="flex gap-2">
+            <div key={index} className="flex gap-2 px-4">
               <div
                 className={`border border-white rounded-full w-10 h-10 p-2 text-[12px] flex items-center justify-center cursor-pointer ${activeState === index ? "bg-[hsl(206,94%,87%)] " : "bg-transparent"}`}
               >
@@ -174,7 +167,7 @@ function Mainpage() {
             </button>
           ) : (
             <button
-              className="text-white cursor-pointer border border-white bg-transparent rounded-[20px] font-bold p-4 w-auto sm:text-sm"
+              className="text-white cursor-pointer border border-white bg-transparent rounded-[20px] font-bold p-4 w-auto text-sm lg:text-[16px] "
               onClick={() => setActiveState(4)}
             >
               View Users
@@ -184,131 +177,156 @@ function Mainpage() {
 
         {/* small screens navbar */}
         <div
-          className="flex lg:hidden gap-4 border bg-cover bg-center text-white py-8 pb-28 border justify-center items-center relative left-1/2 -translate-x-1/2 w-screen "
+          className="w-full lg:hidden flex flex-col items-center bg-cover bg-center text-white py-6 pb-20 overflow-hidden"
           style={{ backgroundImage: "url('/images/bg-sidebar-mobile.svg')" }}
         >
-          <div className="flex gap-4  ">
+          {/* Steps */}
+          <div className="flex gap-3 flex-wrap justify-center w-full px-4">
             {navBarItems.map((items, index) => (
-              <div key={index} className="flex gap-2">
+              <div key={index}>
                 <div
-                  className={`border border-white rounded-full w-10 h-10 p-2 text-[12px] flex items-center justify-center cursor-pointer ${activeState === index ? "bg-[hsl(206,94%,87%)] " : "bg-transparent"}`}
+                  className={`border border-white rounded-full w-10 h-10 flex items-center justify-center text-[12px] ${
+                    activeState === index
+                      ? "bg-[hsl(206,94%,87%)]"
+                      : "bg-transparent"
+                  }`}
                 >
-                  {index + 1}{" "}
+                  {index + 1}
                 </div>
               </div>
             ))}
           </div>
-          {activeState === 4 ? (
-            <button
-              className="ml-8 flex gap-1 cursor-pointer text-white border border-white bg-transparent rounded-[20px] font-bold py-2 px-4 w-auto"
-              onClick={() => setActiveState(0)}
-            >
-              <ArrowLeft size={20} strokeWidth={6} />
-              <p>Back</p>
-            </button>
-          ) : (
-            <button
-              className="ml-8 text-white cursor-pointer font-bold border border-white bg-transparent rounded-[20px] font-bold px-4 py-2 w-auto"
-              onClick={() => setActiveState(4)}
-            >
-              View Users
-            </button>
-          )}
-        </div>
 
-        <div className="-mt-20 lg:mt-0 px-4 relative z-10  ">
-          {activeState === 0 && (
-            <MyForm
-              formData={formData}
-              setFormData={setFormData}
-              errors={errors}
-              handleChange={handleChange}
-            />
-          )}
-          {activeState === 1 && (
-            <Plan
-              selected={selected}
-              setSelected={setSelected}
-              errors={errors}
-              formData={formData}
-              setFormData={setFormData}
-            />
-          )}
-          {activeState === 2 && (
-            <Addons
-              formData={formData}
-              setFormData={setFormData}
-              errors={errors}
-              setOnsAmountPaid = {setOnsAmountPaid}
-            />
-          )}
-          {activeState === 3 && (
-            <Summary
-              formData={formData}
-              selected={selected}
-              setActiveState={setActiveState}
-              setTotalToSubmit={setTotalToSubmit}
-            />
-          )}
-          {activeState === 4 && <UserManagerDashboard />}
-
-          <div className="hidden lg:flex justify-between pt-24 py-4 px-12  ">
-            <button
-              className={`text-white font-bold py-2 px-6 rounded-lg ${activeState === 0 ? "bg-gray-300 cursor-not-allowed" : "bg-[hsl(213,96%,18%)] cursor-pointer"} `}
-              onClick={() => setActiveState((prev) => Math.max(prev - 1, 0))}
-            >
-              Back
-            </button>
-
-            {activeState === 3 ? (
+          {/* Button */}
+          <div className="mt-4">
+            {activeState === 4 ? (
               <button
-                className="text-white font-bold py-2 px-6 rounded-lg bg-[hsl(213,96%,18%)] cursor-pointer"
-                onClick={handleSubmit}
+                className="flex gap-1 items-center text-white border border-white rounded-[20px] font-bold py-2 px-4"
+                onClick={() => setActiveState(0)}
               >
-                Submit
+                <ArrowLeft size={18} />
+                <p>Back</p>
               </button>
             ) : (
               <button
-                className="text-white font-bold py-2 px-6 rounded-lg bg-[hsl(213,96%,18%)] cursor-pointer"
-                onClick={handleNext}
+                className="text-white border border-white rounded-[20px] font-bold px-4 py-2"
+                onClick={() => setActiveState(4)}
               >
-                Next Step
+                View Users
               </button>
+            )}
+          </div>
+        </div>
+
+        <div className="-mt-20 lg:mt-0 w-full flex justify-center">
+          <div
+            className={`${activeState === 4 ? "w-full" : "max-w-2xl w-full"}`}
+          >
+            {activeState === 0 && (
+              <MyForm
+                formData={formData}
+                setFormData={setFormData}
+                errors={errors}
+                handleChange={handleChange}
+              />
+            )}
+            {activeState === 1 && (
+              <Plan
+                selected={selected}
+                setSelected={setSelected}
+                errors={errors}
+                formData={formData}
+                setFormData={setFormData}
+              />
+            )}
+            {activeState === 2 && (
+              <Addons
+                formData={formData}
+                setFormData={setFormData}
+                errors={errors}
+                setOnsAmountPaid={setOnsAmountPaid}
+              />
+            )}
+            {activeState === 3 && (
+              <Summary
+                formData={formData}
+                selected={selected}
+                setActiveState={setActiveState}
+                setTotalToSubmit={setTotalToSubmit}
+              />
+            )}
+            {activeState === 4 && (
+              <div className="w-full min-w-0 justify-start lg:justify-center">
+                {" "}
+                {/* This min-w-0 is mandatory! */}
+                <UserManagerDashboard />
+              </div>
+            )}
+
+            {activeState !== 4 && (
+              <div className="hidden lg:flex justify-between pt-24 py-4 px-12  ">
+                <button
+                  className={`text-white font-bold py-2 px-6 rounded-lg ${activeState === 0 ? "bg-gray-300 cursor-not-allowed" : "bg-[hsl(213,96%,18%)] cursor-pointer"} `}
+                  onClick={() =>
+                    setActiveState((prev) => Math.max(prev - 1, 0))
+                  }
+                >
+                  Back
+                </button>
+
+                {activeState === 3 ? (
+                  <button
+                    className="text-white font-bold py-2 px-6 rounded-lg bg-[hsl(213,96%,18%)] cursor-pointer"
+                    onClick={handleSubmit}
+                  >
+                    Submit
+                  </button>
+                ) : (
+                  <button
+                    className="text-white font-bold py-2 px-6 rounded-lg bg-[hsl(213,96%,18%)] cursor-pointer"
+                    onClick={handleNext}
+                  >
+                    Next Step
+                  </button>
+                )}
+              </div>
             )}
           </div>
         </div>
       </div>
 
       {/* Mobile Fixed Buttons */}
-      <div className="lg:hidden fixed bottom-0 left-0 w-full bg-white flex justify-between px-6 py-4 shadow-md">
-        <button
-          onClick={() => setActiveState((prev) => Math.max(prev - 1, 0))}
-          disabled={activeState === 0}
-          className={`font-bold py-2 px-6 rounded-lg ${
-            activeState === 0
-              ? "bg-gray-300 cursor-not-allowed text-white"
-              : "bg-[hsl(213,96%,18%)] text-white"
-          }`}
-        >
-          Back
-        </button>
+      {activeState !== 4 && (
+        <div className="lg:hidden fixed bottom-0 left-0 w-full bg-white flex justify-between px-6 py-4 shadow-md">
+          <button
+            onClick={() => setActiveState((prev) => Math.max(prev - 1, 0))}
+            disabled={activeState === 0}
+            className={`font-bold py-2 px-6 rounded-lg ${
+              activeState === 0
+                ? "bg-gray-300 cursor-not-allowed text-white"
+                : "bg-[hsl(213,96%,18%)] text-white"
+            }`}
+          >
+            Back
+          </button>
 
-        {activeState === 3 ? (
-          <button
-            onClick={handleSubmit}
-            className="font-bold py-2 px-6 rounded-lg bg-[hsl(213,96%,18%)] text-white cursor-pointer"
-          >
-            Confirm
-          </button>
-        ) : (
-          <button
-            onClick={handleNext}
-            className="font-bold py-2 px-6 rounded-lg bg-[hsl(213,96%,18%)] text-white"
-          >
-            Next Step
-          </button>
-        )}
-      </div>
+          {activeState === 3 ? (
+            <button
+              onClick={handleSubmit}
+              className="font-bold py-2 px-6 rounded-lg bg-[hsl(213,96%,18%)] text-white cursor-pointer"
+            >
+              Confirm
+            </button>
+          ) : (
+            <button
+              onClick={handleNext}
+              className="font-bold py-2 px-6 rounded-lg bg-[hsl(213,96%,18%)] text-white"
+            >
+              Next Step
+            </button>
+          )}
+        </div>
+      )}
     </div>
   );
 }
