@@ -1,11 +1,13 @@
 "use client";
 import React from "react";
+import { useRef } from "react";
 import { supabase } from "../lib/supabase.js";
 import { Search, Filter, Edit2, Trash2, MoreVertical } from "lucide-react";
 import { useState, useEffect } from "react";
 import EditUserModal from "./edit.jsx";
 import toast from "react-hot-toast";
 import { Toaster } from "react-hot-toast";
+import FilterBar from "./filter.jsx";
 
 function UserManagerDashboard() {
   const [loading, setLoading] = useState(true);
@@ -15,6 +17,9 @@ function UserManagerDashboard() {
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
   const [selectedUser, setSelectedUser] = useState(null);
   const [userToDelete, setUserToDelete] = useState(null); // stores the ID or null
+  const [filters, setFilters] = useState({ planType: null, addonType: null });
+  const [showFilter, setShowFilter] = useState(false);
+  const filterRef = useRef(null);
 
   const fetchFormData = async () => {
     try {
@@ -70,11 +75,37 @@ function UserManagerDashboard() {
 
   const filterUsers = users.filter((user) => {
     const search = searchTerm.toLowerCase();
-    return (
+
+    const matchesSearch =
       user.name?.toLowerCase().includes(search) ||
-      user.email?.toLowerCase().includes(search)
-    );
+      user.email?.toLowerCase().includes(search);
+
+    const matchesPlan = filters.planType
+      ? user.plan?.toLowerCase().includes(filters.planType)
+      : true;
+
+    const matchesAddons= filters.addonType
+      ? user.addons?.some((addon) =>
+          addon.title?.toLowerCase().includes(filters.addonType),
+        )
+      : true;
+
+    return matchesSearch && matchesPlan && matchesAddons;
   });
+
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      if (filterRef.current && !filterRef.current.contains(event.target)) {
+        setShowFilter(false);
+      }
+    };
+
+    document.addEventListener("mousedown", handleClickOutside);
+
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+    };
+  }, []);
 
   const handleEditClick = (user) => {
     setSelectedUser(user);
@@ -103,11 +134,22 @@ function UserManagerDashboard() {
             onChange={(e) => setSearchTerm(e.target.value)}
           />
         </div>
-        <div className="w-full md:w-auto gap-4 flex justify-between">
-          <button className="flex py-2 px-4 gap-2 justify-center items-center rounded-lg border border-[hsl(240,8%,87%)]">
+        <div
+          className="relative "
+          ref={filterRef}
+        >
+          <button
+            onClick={() => setShowFilter((prev) => !prev)}
+            className="flex py-2 px-4 gap-2 justify-center items-center rounded-lg border border-[hsl(240,8%,87%)]"
+          >
             <Filter className="h-4 w-4" />
             <p>Filter</p>
           </button>
+          {showFilter && (
+              <div className="absolute right-0 mt-1 z-50 w-[300px]">
+                <FilterBar filters={filters} setFilters={setFilters} />
+              </div>
+            )}
         </div>
       </div>
       <div className="w-full overflow-x-auto  lg:overflow-x-hidden rounded-lg">
